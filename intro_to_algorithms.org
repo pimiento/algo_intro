@@ -1,0 +1,338 @@
+#+TITLE: Введение в алгоритмы
+#+EMAIL: @pvavilin
+#+AUTHOR: @pvavilin
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:https://orgmode.org/org-info.js
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [smallest]
+#+LATEX_HEADER: \usetheme{default}
+#+LATEX_HEADER: \usecolortheme{crane}
+#+LATEX_HEADER: \usepackage{tikzsymbols}
+#+LATEX_HEADER: \RequirePackage{fancyvrb}
+#+LATEX_HEADER: \DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\scriptsize}
+#+LaTeX_HEADER: \lstset{basicstyle=\scriptsize\ttfamily}
+#+OPTIONS: \n:t ^:nil
+
+#+NAME: import
+#+BEGIN_SRC python :exports none
+  import sys
+  import timeit
+  from typing import List
+#+END_SRC
+#+NAME: running
+#+BEGIN_SRC python :exports none
+  if __name__ == "__main__":
+      int_count = sys.argv[1]
+      with open(f"data/{int_count}ints.txt", "r") as data:
+          arr: List[int] = [int(line.strip()) for line in data.readlines()]
+          number:int = 2
+          def to_call():
+              return counter(arr)
+          result = timeit.timeit(to_call, number=number)
+          print(
+              f"{number} вызовов для {int_count} данных: лучший результат равен {result:.02f}"
+          )
+#+END_SRC
+#+NAME: running_sort
+#+BEGIN_SRC python :exports none
+  if __name__ == "__main__":
+      int_count = sys.argv[1]
+      with open(f"data/{int_count}ints.txt", "r") as data:
+          arr: List[int] = [int(line.strip()) for line in data.readlines()]
+          number:int = 2
+          def to_call():
+              return sort_alg(arr)
+          result = timeit.timeit(to_call, number=number)
+          print(
+              f"{number} вызовов для {int_count} данных: лучший результат равен {result:.02f}"
+          )
+#+END_SRC
+* Зачем нужны алгоритмы?
+** Задача
+  Подсчитать, какое количество сочетаний по три элементов входного массива даст в сумме 0.
+
+* Зачем нужны алгоритмы?
+  #+BEGIN_SRC python :exports code :noweb strip-export :tangle first_try.py :shebang "#!/usr/bin/env python3"
+    <<import>>
+    def counter(a: List[int]) -> int:
+        N:int = len(a)
+        counter:int = 0
+        for i in range(N):
+            for j in range(i+1, N):
+                for k in range(j+1, N):
+                    s = a[i] + a[j] + a[k]
+                    if s == 0:
+                        counter += 1
+        return counter
+
+    <<running>>
+  #+END_SRC
+
+* Результат наивной реализации
+  #+BEGIN_QUOTE
+  % python ./first_try.py 1K
+2 вызовов для 1K данных: лучший результат равен 42.02
+  % python ./first_try.py 2K
+2 вызовов для 2K данных: лучший результат равен 340.84
+  #+END_QUOTE
+* Бинарный поиск
+  #+NAME: binary_search
+  #+BEGIN_SRC python :exports code :noweb strip-export
+    <<import>>
+
+    def binary_search(
+            lst:List[int], target:int
+    ) -> int:
+        start:int = 0
+        end:int = len(lst) - 1
+        while(start <= end):
+            mid = (start + end) // 2
+            if(lst[mid] > target):
+                end = mid - 1
+            elif(lst[mid] < target):
+                start = mid + 1
+            else:
+                return mid
+        return -1
+  #+END_SRC
+* Быстрый ThreeSum
+  #+BEGIN_SRC python :exports code :noweb strip-export :tangle fast_threesum.py :shebang "#!/usr/bin/env python3"
+    <<binary_search>>
+
+    def counter(a: List[int]) -> int:
+      # O(NlogN)
+      arr:List[int] = sorted(a)
+      N:int = len(arr)
+      counter:int = 0
+      for i in range(N):
+        for j in range(i+1, N):
+          # O(logN)
+          if binary_search(
+            arr, -(arr[i]+arr[j])
+          ) > j:
+            counter += 1
+      return counter
+    <<running>>
+  #+END_SRC
+* Рузельтат быстрого ThreeSum
+  #+BEGIN_QUOTE
+  % python fast_threesum.py 1K
+2 вызовов для 1K данных: лучший результат равен 1.64
+  % python fast_threesum.py 2K
+2 вызовов для 2K данных: лучший результат равен 7.36
+  % python fast_threesum.py 4K
+2 вызовов для 4K данных: лучший результат равен 31.31
+  #+END_QUOTE
+* Алгоритмическая сложность
+  #+ATTR_LATEX: :width 1.1\textwidth
+  [[file:///home/pimiento/yap/order_of_growth.png]]
+* Нужны ли алгоритмы backend-разработчику?
+  #+ATTR_LATEX: :width .8\textwidth
+  [[file:///home/pimiento/yap/algorithms_for_kids.png]]
+* Какие алгоритмы нужнее всего?
+** Зависит от задачи, области применения
+   - алгоритмы на строках
+     нужны например биоинформатикам, для работы с последовательностями ДНК
+   - алгоритмы на деревьях
+     - компиляторы
+     - машинное обучение
+     - построение маршрутов
+     - парсинг сайтов
+* Структуры данных. Очередь
+  - FIFO :: First In First Out
+  #+ATTR_LATEX: :width .8\textwidth
+  [[file:///home/pimiento/yap/Fifo_queue.png]]
+* Структуры данных. Стек
+  - LIFO :: Last In First Out
+  #+ATTR_LATEX: :width .8\textwidth
+  [[file:///home/pimiento/yap/Lifo_stack.png]]
+* Структуры данных. Граф
+  #+NAME: graph
+  #+BEGIN_SRC python :exports code
+    graph = {
+        'A': ['B', 'C'],
+        'B': ['A', 'D', 'E'],
+        'C': ['A', 'F'],
+        'D': ['B'],
+        'E': ['B', 'F'],
+        'F': ['C', 'E']
+    }
+  #+END_SRC
+  #+ATTR_LATEX: :width .18\textwidth
+  [[file:///home/pimiento/yap/graph.png]]
+* Поиск вглубину. Depth-First Search
+  #+BEGIN_SRC python :exports both :noweb strip-export :results output
+    <<graph>>
+    def dfs(graph, start, goal):
+      stack = [(start, [start])]
+      while stack:
+        (v, p) = stack.pop()
+        paths = set(graph[v]) - set(p)
+        for nxt in paths:
+          if nxt == goal:
+            yield p + [nxt]
+          else:
+            stack.append((nxt, p+[nxt]))
+    print(list(dfs(graph, 'A', 'F')))
+  #+END_SRC
+
+  #+RESULTS:
+  : [['A', 'C', 'F'], ['A', 'B', 'E', 'F']]
+
+* Глупая сортировка / сортировка дурака
+  #+NAME: fool_sort
+  #+BEGIN_SRC python :exports code
+    def sort_alg(l):
+      while True:
+        c = 0
+        for i in range(len(l)-1):
+          if l[i] > l[i+1]:
+            l[i+1],l[i] = l[i],l[i+1]
+          else:
+            c += 1
+        if c == (len(l) - 1): return l
+
+  #+END_SRC
+
+  #+BEGIN_SRC python :exports both :results output :noweb strip-export
+    <<fool_sort>>
+    print(sort_alg([1, 3, 2, 0]))
+  #+END_SRC
+
+  #+RESULTS:
+  : [0, 1, 2, 3]
+
+* Результат глупой сортировки
+  - Эффективность *глупой сортировки*: $\mathcal{O}(N^{3})$
+  #+BEGIN_SRC python :exports none :tangle fool_sort.py :noweb tangle :shebang "#!/usr/bin/env python3"
+    <<import>>
+
+
+    <<fool_sort>>
+
+    <<running_sort>>
+  #+END_SRC
+  #+BEGIN_QUOTE
+  % ./fool_sort.py 1K
+2 вызовов для 1K данных: лучший результат равен 0.12
+  % ./fool_sort.py 2K
+2 вызовов для 2K данных: лучший результат равен 0.53
+  % ./fool_sort.py 4K
+2 вызовов для 4K данных: лучший результат равен 2.15
+  #+END_QUOTE
+* Пузырьковая сортировка
+  #+NAME: bubble_sort
+  #+BEGIN_SRC python :exports none
+    def sort_alg(l):
+      for i in range(len(l)):
+        for j in range(len(l[i+1:])):
+          if l[j] > l[j+1]:
+            l[j], l[j+1] = (l[j+1], l[j])
+      return l
+  #+END_SRC
+
+  #+begin_src python :exports both :noweb yes :results output
+    <<bubble_sort>>
+
+    print(sort_alg([1, 3, -1, 2, 0]))
+  #+end_src
+
+  #+RESULTS:
+  : [-1, 0, 1, 2, 3]
+* Результат пузырьковой сортировки
+  #+begin_src python :exports none :tangle bubble_sort.py :noweb tangle :shebang "#!/usr/bin/env python3"
+    <<import>>
+
+
+    <<bubble_sort>>
+
+    <<running_sort>>
+  #+end_src
+  - Эффективность *пузырьковой сортировки*: $\mathcal{O}(N^{2})$
+  #+begin_quote
+  % ./bubble_sort.py 1K
+2 вызовов для 1K данных: лучший результат равен 0.11
+  % ./bubble_sort.py 2K
+2 вызовов для 2K данных: лучший результат равен 0.45
+  % ./bubble_sort.py 4K
+2 вызовов для 4K данных: лучший результат равен 1.86
+  #+end_quote
+* Сортировка слиянием (Merge Sort)
+  - __[[https://gist.github.com/pimiento/72ea7cc917e1e732f834e307f6998d89][Код]]__
+  - __[[https://www.youtube.com/watch?v=JSceec-wEyw][мультик]]__
+  Сортировка слиянием позволяет нам распараллелить процесс сортировки. Это очень эффективно на больших данных и широко используется в алгоритмах map/reduce.
+* Результат Merge Sort
+  - Эффективность *Merge Sort*: $\mathcal{O}(NlogN)$
+  #+begin_src python :exports none :tangle merge_sort.py :noweb tangle :shebang "#!/usr/bin/env python3"
+    <<import>>
+
+
+    def merge_sort(A):
+        if len(A) == 1 or len(A) == 0:
+            return A
+        L, R = A[:len(A) // 2], A[len(A) // 2:]
+        merge_sort(L)
+        merge_sort(R)
+        n = m = k = 0
+        C = [0] * (len(L) + len(R))
+        while n < len(L) and m < len(R):
+            if L[n] <= R[m]:
+                C[k] = L[n]
+                n += 1
+            else:
+                C[k] = R[m]
+                m += 1
+            k += 1
+        while n < len(L):
+            C[k] = L[n]
+            n += 1
+            k += 1
+        while m < len(R):
+            C[k] = R[m]
+            m += 1
+            k += 1
+        for i in range(len(A)):
+            A[i] = C[i]
+        return A
+
+    def sort_alg(A):
+        return merge_sort(A)
+
+    <<running_sort>>
+  #+end_src
+  #+begin_quote
+  % ./merge_sort.py 1K
+2 вызовов для 1K данных: лучший результат равен 0.01
+  % ./merge_sort.py 4K
+2 вызовов для 4K данных: лучший результат равен 0.03
+  % ./merge_sort.py 8K
+2 вызовов для 8K данных: лучший результат равен 0.07
+  % ./merge_sort.py 32K
+2 вызовов для 32K данных: лучший результат равен 0.31
+  #+end_quote
+* Сравнение алгоритмов сортировки
+  #+ATTR_LATEX: :width 1.1\textwidth
+  [[file:///home/pimiento/yap/sorting_algorithms.png]]
+
+* Устойчивость сортировки
+  #+BEGIN_SRC python :exports both :results output
+    records = [
+       {"A": "X", "B": 2},
+       {"A": "X", "B": 1},
+       {"A": "Y", "B": 1},
+    ]
+    records.sort(key=lambda x: x["A"])
+    for r in records:
+        print(f"{r['A']}, {r['B']}")
+  #+END_SRC
+
+  #+RESULTS:
+  : X, 2
+  : X, 1
+  : Y, 1
+
+
+* Как изучать алгоритмы
+  - __[[https://practicum.yandex.ru/algorithms/][Яндекс.Практикум]]__
+  - Coursera (__[[https://www.coursera.org/learn/algorithms-part1][Part I]]__, __[[https://www.coursera.org/learn/algorithms-part2][Part II]]__)
+  - Альманах алгоритмов: Т.Кормен, Ч.Лейзерсон, Р.Ривест, К.Штайн «Алгоритмы. Построение и анализ.»

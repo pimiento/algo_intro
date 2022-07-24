@@ -11,6 +11,9 @@
 #+LATEX_HEADER: \RequirePackage{fancyvrb}
 #+LATEX_HEADER: \DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\scriptsize}
 #+LaTeX_HEADER: \lstset{basicstyle=\scriptsize\ttfamily}
+#+LATEX_HEADER: \usepackage{xlop}
+#+LATEX_HEADER: \usepackage{booktabs}
+#+LATEX_HEADER: \usebackgroundtemplate{\includegraphics[width=\paperwidth,height=\paperheight]{bg.jpeg}}
 #+OPTIONS: \n:t ^:nil
 
 #+NAME: import
@@ -314,25 +317,208 @@
   #+ATTR_LATEX: :width 1.1\textwidth
   [[file:sorting_algorithms.png]]
 
-* Устойчивость сортировки
-  #+BEGIN_SRC python :exports both :results output
-    records = [
-       {"A": "X", "B": 2},
-       {"A": "X", "B": 1},
-       {"A": "Y", "B": 1},
-    ]
-    records.sort(key=lambda x: x["A"])
-    for r in records:
-        print(f"{r['A']}, {r['B']}")
+* Умножение двух чисел
+  \begin{equation}
+  \opmul{5678}{1234}\qquad
+  \end{equation}
+* Умножение двоичных чисел
+  #+ATTR_LATEX: :width .8\textwidth
+  [[file:binary_multiplication.png]]
+  /Можно ли лучше?/
+* Алгоритм Каратцубы
+  #+NAME: karatsuba
+  #+BEGIN_SRC python :exports code
+    x = 5678
+    y = 1234
+
+    a = 56; b = 78
+    c = 12; d = 34
+  #+END_SRC
+* Алгоритм Каратцубы
+  #+NAME: pre_result
+  #+BEGIN_SRC python :exports code :noweb strip-export
+    <<karatsuba>>
+    # step1
+    step1 = a * c
+    # step2
+    step2 = b * d
+    # step3
+    a_b = a + b
+    c_d = c + d
+    step3 = a_b * c_d
+    # step4:
+    # step3 - step2 - step1
+    step4 = step3 - step2 - step1
+  #+END_SRC
+* Алгоритм Каратцубы
+  #+BEGIN_SRC python :exports both :noweb strip-export :results output
+    <<pre_result>>
+    line1 = step1 * 10**4
+    line2 = step2
+    line3 = step4 * 10**2
+    result = (
+        line1
+        + line2
+        + line3
+    )
+    print(result)
   #+END_SRC
 
   #+RESULTS:
-  : X, 2
-  : X, 1
-  : Y, 1
+  : 7006652
+* Умножение матриц
+  \begin{equation}
+  \left[ \begin{array}{ccc} A & B \\ C & D \\ \end{array} \right]
+  \times
+  \left[ \begin{array}{ccc} E & F \\ G & H \\ \end{array} \right]
+  = \left[ \begin{array}{ccc} AE + BG & AF + BH \\ CE + DG & CF + DH \\ \end{array} \right]
+  \end{equation}
 
+* Умножение матриц
+  #+BEGIN_SRC python :exports code
+    def mxm(A, X):
+      n = len(A)    # A: n×m
+      m = len(A[0])
+      p = len(X[0]) # X: m×p
+      B = [[0] * p] * n
+      for i in range(n):
+        for j in range(p):
+          for k in range(m):
+            B[i][j] += A[i][k]*X[k][j]
+      return B
+  #+END_SRC
+  *Где ошибка в этом коде?*
+* Умножение матриц
+  #+NAME: matrix_multiply
+  #+BEGIN_SRC python :exports code
+    def mxm(A, X):
+      n = len(A)    # A: n×m
+      m = len(A[0])
+      p = len(X[0]) # X: m×p
+      B = [[0] * p for _ in range(n)]
+      for i in range(n):
+        for j in range(p):
+          for k in range(m):
+            B[i][j] += A[i][k]*X[k][j]
+      return B
+  #+END_SRC
+  #+BEGIN_SRC python :exports none :noweb strip-export :tangle matrix_multiply.py :shebang "#!/usr/bin/env python3"
+    import numpy as np
+    <<matrix_multiply>>
 
+    A = [
+      [1, 2, 3, 4],
+      [1, 2, 3, 4],
+      [1, 2, 3, 4],
+      [1, 2, 3, 4]
+    ]
+
+    B = [
+        [5, 5, 5, 5],
+        [6, 6, 6, 6],
+        [7, 7, 7, 7],
+        [8, 8, 8, 8]
+    ]
+
+    result = mxm(A, B)
+    print(result)
+
+    np_result = np.dot(np.array(A), np.array(B))
+    assert (np_result == np.array(result)).all(), [np_result, np.array(result)]
+  #+END_SRC
+  #+BEGIN_CENTER
+  $O(n^{3})$
+  /Можно ли лучше?/
+  #+END_CENTER
+* Алгоритм Штрассена
+  \begin{normalsize}
+  \left[ \begin{array}{cccc} 11 & 12 & 13 & 14 \\ 21 & 22 & 23 & 24 \\ 31 & 32 & 33 & 34 \\ 41 & 42 & 43 & 44 \\ \end{array} \right] =
+  \left[ \begin{array}{cc} A & B \\ C & D \\ \end{array} \right]
+  \end{normalsize}
+  \begin{normalsize}
+  \left[ \begin{array}{cccc} 11 & 21 & 31 & 41 \\ 12 & 22 & 32 & 42 \\ 13 & 23 & 33 & 43 \\ 14 & 24 & 34 & 44 \\ \end{array} \right] =
+  \left[ \begin{array}{cc} E & F \\ G & H \\ \end{array} \right]
+  \end{normalsize}
+
+* Алгоритм Штрассена
+  \begin{array}{l}
+  P_{1} = A(F - H), \\
+  P_{2} = (A + B)H, \\
+  P_{3} = (C + D)E, \\
+  P_{4} = D(G - E), \\
+  P_{5} = (A + D)(E + H), \\
+  P_{6} = (B - D)(G + H), \\
+  P_{7} = (A - C)(E + F) \\
+  \end{array}
+  \begin{footnotesize}
+  \left[ \begin{array}{cc} AE+BG & AF+BH \\ CE+DG & CF+DH \end{array} \right] =
+  \left[ \begin{array}{ll} P_{5} + P_{4} - P_{2} + P_{6} & P_{1} + P_{2} \\ P_{3} + P_{4} & P_{1} + P_{5} - P_{3} + P_{7} \end{array} \right]
+  \end{footnotesize}
+
+* векторизация
+  - Большинство операций процессора это SISD: Single Instruction Single Data
+    #+ATTR_LATEX: :center t :mode table :align l|l|l|l
+    | 0     | 1        | 2        | 3        |
+    | a[0]= | not used | not used | not used |
+    | b[0]+ | not used | not used | not used |
+    | c[0]  | not used | not used | not used |
+  - Процессор может поддерживать специальные регистры для __[[https://ru.wikipedia.org/wiki/SIMD][SIMD]]__: Single Instruction Multiple Data
+    #+ATTR_LATEX: :center t :mode table :align l|l|l|l
+    | 0     | 1     | 2     | 3     |
+    | a[0]= | a[1]= | a[2]= | a[3]= |
+    | b[0]+ | b[1]+ | b[2]+ | b[3]+ |
+    | c[0]  | c[1]  | c[2]  | c[3]  |
+
+* Пример умножения матриц
+  __[[https://datahacker.rs/003-how-to-resize-translate-flip-and-rotate-an-image-with-opencv/][Article]]__
+  #+ATTR_LATEX: :width .5\textwidth
+  [[file:image_rotates.jpg]]
+* Логистическая регрессия
+  $z = w_{0}x + w_{1}x + \dots + w_{n}x + b$ \\
+  $a = \frac{1}{1+e^{-z}}$
+    #+BEGIN_SRC python :results file :exports results
+      import matplotlib
+      matplotlib.use("Agg")
+
+      import matplotlib.pyplot as plt
+      from scipy.special import expit
+      import numpy as np
+
+      #define range of x-values
+      x = np.linspace(-10, 10, 100)
+
+      #calculate sigmoid function for each x-value
+      y = expit(x)
+
+      #create plot
+      plt.plot(x, y)
+      plt.xlabel('z', loc="right")
+      plt.ylabel("σ(z)", loc="top")
+      ax = plt.gca()
+      ax.spines[["left", "bottom"]].set_position(("data", 0))
+      ax.spines[["top", "right"]].set_visible(False)
+      ax.plot(1, 0, ">k", transform=ax.get_yaxis_transform(), clip_on=False)
+      ax.plot(0, 1, "^k", transform=ax.get_xaxis_transform(), clip_on=False)
+
+      #display plot
+      fname = "sigmoid_fun.png"
+      plt.savefig(fname)
+
+      return fname
+    #+END_SRC
+
+    #+attr_latex: :width 160px
+    #+RESULTS:
+    [[file:sigmoid_fun.png]]
+* Котики!
+  __[[https://github.com/pimiento/numerical_algorithms_ML_webinar/blob/master/nn_model.py][GitHub]]__
+* Tensorflow
+  __[[https://colab.research.google.com/drive/1peolUQzHOVC4QVELMCBO1zluc1-pNsma?usp=sharing][Colab]]__
 * Как изучать алгоритмы
   - __[[https://practicum.yandex.ru/algorithms/][Яндекс.Практикум]]__
   - Coursera (__[[https://www.coursera.org/learn/algorithms-part1][Part I]]__, __[[https://www.coursera.org/learn/algorithms-part2][Part II]]__)
   - Альманах алгоритмов: Т.Кормен, Ч.Лейзерсон, Р.Ривест, К.Штайн «Алгоритмы. Построение и анализ.»
+  - [[https://acm.timus.ru/?locale=ru][Порешать задачки. Timus]]
+* Вопросы-ответы
+  #+ATTR_LATEX: :width .6\textwidth
+  [[file:///home/pimiento/yap/questions.jpg]]

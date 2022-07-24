@@ -125,10 +125,10 @@
   #+END_QUOTE
 * Алгоритмическая сложность
   #+ATTR_LATEX: :width 1.1\textwidth
-  [[file:///home/pimiento/yap/order_of_growth.png]]
+  [[file:order_of_growth.png]]
 * Нужны ли алгоритмы backend-разработчику?
   #+ATTR_LATEX: :width .8\textwidth
-  [[file:///home/pimiento/yap/algorithms_for_kids.png]]
+  [[file:algorithms_for_kids.png]]
 * Какие алгоритмы нужнее всего?
 ** Зависит от задачи, области применения
    - алгоритмы на строках
@@ -141,11 +141,11 @@
 * Структуры данных. Очередь
   - FIFO :: First In First Out
   #+ATTR_LATEX: :width .8\textwidth
-  [[file:///home/pimiento/yap/Fifo_queue.png]]
+  [[file:Fifo_queue.png]]
 * Структуры данных. Стек
   - LIFO :: Last In First Out
   #+ATTR_LATEX: :width .8\textwidth
-  [[file:///home/pimiento/yap/Lifo_stack.png]]
+  [[file:Lifo_stack.png]]
 * Структуры данных. Граф
   #+NAME: graph
   #+BEGIN_SRC python :exports code
@@ -159,7 +159,7 @@
     }
   #+END_SRC
   #+ATTR_LATEX: :width .18\textwidth
-  [[file:///home/pimiento/yap/graph.png]]
+  [[file:graph.png]]
 * Поиск вглубину. Depth-First Search
   #+BEGIN_SRC python :exports both :noweb strip-export :results output
     <<graph>>
@@ -312,7 +312,7 @@
   #+end_quote
 * Сравнение алгоритмов сортировки
   #+ATTR_LATEX: :width 1.1\textwidth
-  [[file:///home/pimiento/yap/sorting_algorithms.png]]
+  [[file:sorting_algorithms.png]]
 
 * Устойчивость сортировки
   #+BEGIN_SRC python :exports both :results output

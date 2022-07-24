@@ -114,7 +114,7 @@
       return counter
     <<running>>
   #+END_SRC
-* Рузельтат быстрого ThreeSum
+* Результат быстрого ThreeSum
   #+BEGIN_QUOTE
   % python fast_threesum.py 1K
 2 вызовов для 1K данных: лучший результат равен 1.64
